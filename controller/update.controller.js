@@ -1,8 +1,9 @@
-import {jobs, cron} from "../init.js";
-import _ from 'lodash';
+import {jobs} from "../init.js";
 import axios from 'axios';
+import cron from 'node-cron';
 
-export const createJobs = async (req,res) => {
+
+export const updateJobs = async (req,res) => {
 
     try{
         const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme } = req.body;
@@ -19,10 +20,10 @@ export const createJobs = async (req,res) => {
         let cronStringStart = "";
         let cronStringStop = "";
         
-        cronStringStart + startTime.getMinutes() + "" + startTime.getHours() + " * * " + startTime.getDay();
+        cronStringStart + startTime.getMinutes() + "" + startTime.getHours() + " * * " + startDay;
         console.log(cronStringStart);
 
-        cronStringStart + endTime.getMinutes() + "" + endTime.getHours() + " * * " + endTime.getDay();
+        cronStringStart + endTime.getMinutes() + "" + endTime.getHours() + " * * " + endDay;
         console.log(cronStringStop);
 
         const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
@@ -34,9 +35,17 @@ export const createJobs = async (req,res) => {
           
           cronJobStart.start();
 
+          const switchingSchemeInvert = {};
+    
+            for (const key in obj) {
+                if (switchingScheme.hasOwnProperty(key)) {
+                    switchingSchemeInvert[key] = !obj[key];
+                }
+            }
+
           const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
             
-            const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
+            const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
           }, {
             scheduled: false
           });
