@@ -17,29 +17,32 @@ export const updateJobs = async (req,res) => {
             throw new Error("No job found");
         }
 
-        let cronStringStart = "";
-        let cronStringStop = "";
-        
-        cronStringStart + startTime.getMinutes() + "" + startTime.getHours() + " * * " + startDay;
-        console.log(cronStringStart);
+        console.log(startTime.split(":"));
 
-        cronStringStart + endTime.getMinutes() + "" + endTime.getHours() + " * * " + endDay;
+        const startString = startTime.split(":");
+        console.log(startString);
+        const stopString = endTime.split(":");
+
+        let cronStringStart = startString[1] + " " + startString[0] + " * * " + startDay;
+        console.log(cronStringStart);
+        let cronStringStop = stopString[1] + " " + stopString[0] + " * * " + endDay;
         console.log(cronStringStop);
 
         const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
-            
+
             const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
           }, {
             scheduled: false
           });
+
           
           cronJobStart.start();
 
           const switchingSchemeInvert = {};
     
-            for (const key in obj) {
+            for (const key in switchingScheme) {
                 if (switchingScheme.hasOwnProperty(key)) {
-                    switchingSchemeInvert[key] = !obj[key];
+                    switchingSchemeInvert[key] = !switchingScheme[key];
                 }
             }
 
@@ -55,7 +58,8 @@ export const updateJobs = async (req,res) => {
           jobs.saveJobStart(scheduleId, cronJobStart);
           jobs.saveJobStop(scheduleId, cronJobStop);
 
-          res.status(200).send("Job Updated");
+          res.status(200).send("Job Created");
+
 
     }catch(error){
         res.status(500).send(error.message);

@@ -8,29 +8,32 @@ export const createJobs = async (req,res) => {
     try{
         const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme } = req.body;
 
-        let cronStringStart = "";
-        let cronStringStop = "";
-        
-        cronStringStart + startTime.getMinutes() + "" + startTime.getHours() + " * * " + startDay;
-        console.log(cronStringStart);
+        console.log(startTime.split(":"));
 
-        cronStringStart + endTime.getMinutes() + "" + endTime.getHours() + " * * " + endDay;
+        const startString = startTime.split(":");
+        console.log(startString);
+        const stopString = endTime.split(":");
+
+        let cronStringStart = startString[1] + " " + startString[0] + " * * " + startDay;
+        console.log(cronStringStart);
+        let cronStringStop = stopString[1] + " " + stopString[0] + " * * " + endDay;
         console.log(cronStringStop);
 
         const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
-            
+
             const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
           }, {
             scheduled: false
           });
+
           
           cronJobStart.start();
 
           const switchingSchemeInvert = {};
     
-            for (const key in obj) {
+            for (const key in switchingScheme) {
                 if (switchingScheme.hasOwnProperty(key)) {
-                    switchingSchemeInvert[key] = !obj[key];
+                    switchingSchemeInvert[key] = !switchingScheme[key];
                 }
             }
 

@@ -8,7 +8,7 @@ import json from "body-parser/lib/types/json.js";
 const app = express();
 app.use(express.json());
 
-const server = app.listen(4003, function () {
+const server = app.listen(4004, function () {
     var host = server.address().address;
     var port = server.address().port;
     console.log(

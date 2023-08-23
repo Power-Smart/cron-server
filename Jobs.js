@@ -3,14 +3,14 @@ export class Jobs {
         this.jobListStart = {};
         this.jobListStop = {};
         this.saveJobStart = this.saveJobStart.bind(this);
-        this.saveJobEnd = this.saveJobEnd.bind(this);
+        this.saveJobStop = this.saveJobStop.bind(this);
     }
 
     saveJobStart(jobId, job){
         this.jobListStart[jobId] = job;
     }
 
-    saveJobEnd(jobId, job){
+    saveJobStop(jobId, job){
         this.jobListStop[jobId] = job;
     }
 }
