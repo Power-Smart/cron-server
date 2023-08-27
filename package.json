@@ -1,0 +1,20 @@
+{
+  "name": "cron-server",
+  "version": "1.0.0",
+  "description": "Dedicated server for cron jobs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "express": "^4.18.2",
+    "lodash": "^4.17.21",
+    "node-cron": "^3.0.2",
+    "nodemon": "^3.0.1"
+  },
+  "type": "module"
+}
