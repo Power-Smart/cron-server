@@ -6,7 +6,7 @@ import cron from 'node-cron';
 export const updateJobs = async (req,res) => {
 
     try{
-        const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme } = req.body;
+        const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
 
         if(jobs.jobListStart.hasOwnProperty(scheduleId) && jobs.jobListStop.hasOwnProperty(scheduleId)){
 
@@ -32,7 +32,8 @@ export const updateJobs = async (req,res) => {
 
             const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
           }, {
-            scheduled: false
+            scheduled: false,
+            timezone: [timeZone]  
           });
 
           
@@ -50,7 +51,8 @@ export const updateJobs = async (req,res) => {
             
             const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
           }, {
-            scheduled: false
+            scheduled: false,
+            timezone: [timeZone]
           });
           
           cronJobStop.start();
