@@ -42,6 +42,7 @@ export const updateJobs = async (req,res) => {
 
 		const jobToSaveStart = {
 			"id": scheduleId,
+			"jobString": cronStringStart,
 			"job": cronJobStart,
 			"status": true
 		};	
@@ -68,6 +69,7 @@ export const updateJobs = async (req,res) => {
 
 		const jobToSaveStop = {
 			"id": scheduleId,
+			"jobString": cronStringStop,
 			"job": cronJobStop,
 			"status": true
 		};	
