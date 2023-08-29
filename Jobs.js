@@ -7,10 +7,16 @@ export class Jobs {
     }
 
     saveJobStart(jobId, job){
+        // console.log("inside start save");
+        // console.log("job id", jobId);
+        // console.log("job", job);
         this.jobListStart[jobId] = job;
     }
 
     saveJobStop(jobId, job){
+        // console.log("inside stop save");
+        // console.log("job id", jobId);
+        // console.log("job", job);
         this.jobListStop[jobId] = job;
     }
 }

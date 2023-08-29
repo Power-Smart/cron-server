@@ -4,7 +4,8 @@ import {
     mainControllerPost,
 } from "../controller/main.controller.js";
 import {
-    createJobs
+    createJobs,
+    createJobsBegin
 } from "../controller/create.controller.js";
 import {
     updateJobs
@@ -19,6 +20,7 @@ const router = express.Router();
 router.get("/", mainController);
 router.post("/", mainControllerPost);
 router.post("/create",createJobs);
+router.post("/createBegin/:status",createJobsBegin);
 router.post("/update",updateJobs);
 router.post("/delete",deleteJobs);
 
