@@ -21,7 +21,11 @@ export const createJobs = async (req,res) => {
 
 		const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
 			console.log('job started');
-			const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
+			try{
+				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
+			}catch(error){
+				console.log(error.message);
+			}
 		}, {
 			scheduled: false,
 			timezone: timeZone
@@ -54,8 +58,12 @@ export const createJobs = async (req,res) => {
 
 		const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
 			console.log('job started');
-			const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
-		}, {
+				try{
+					const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
+				}catch(error){
+					console.log(error.message);
+				}
+			}, {
 			scheduled: false,
 			timezone: [timeZone]
 		});
@@ -107,8 +115,11 @@ export const createJobsBegin = async (req,res) => {
 
 		const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
 			console.log('job started');
-			const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
-		}, {
+			try{
+				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
+			}catch(error){
+				console.log(error.message);
+			}		}, {
 			scheduled: false,
 			timezone: timeZone
 		});
@@ -140,8 +151,11 @@ export const createJobsBegin = async (req,res) => {
 
 		const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
 			console.log('job started');
-			const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
-		}, {
+			try{
+				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
+			}catch(error){
+				console.log(error.message);
+			}		}, {
 			scheduled: false,
 			timezone: [timeZone]
 		});
