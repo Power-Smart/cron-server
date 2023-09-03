@@ -65,7 +65,7 @@ export const createJobs = async (req,res) => {
 				}
 			}, {
 			scheduled: false,
-			timezone: [timeZone]
+			timezone: timeZone
 		});
 
 		const jobToSaveStop = {
@@ -157,7 +157,7 @@ export const createJobsBegin = async (req,res) => {
 				console.log(error.message);
 			}		}, {
 			scheduled: false,
-			timezone: [timeZone]
+			timezone: timeZone
 		});
 
 		const jobToSaveStop = {
