@@ -40,7 +40,7 @@ export const updateJobs = async (req,res) => {
 				console.log(error.message);
 			}		}, {
 			scheduled: false,
-			timezone: [timeZone]
+			timezone: timeZone
 		});
 
 		const jobToSaveStart = {
