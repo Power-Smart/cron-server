@@ -1,17 +1,19 @@
 import express from "express";
-import { 
+import {
     jobs,
     files
-    } from "./init.js";
+} from "./init.js";
 import _ from "lodash";
 import cron from "node-cron";
 import axios from "axios";
+import { webserverApi } from "./apis.js";
 
 // routes
 import mainRoute from "./routes/main.route.js";
 import json from "body-parser/lib/types/json.js";
 
 const app = express();
+
 app.use(express.json());
 
 const server = app.listen(4004, async function () {
@@ -32,108 +34,108 @@ const server = app.listen(4004, async function () {
         console.log("\x1b[33m ඇතුලෙ ඉන්නෙ... \x1b[0m");
 
         const jsonElement = JSON.parse(element);
-        
-        if(!_.isNull(jsonElement)){
+
+        if (!_.isNull(jsonElement)) {
 
             const status = jsonElement.status;
 
             console.log(status);
 
-            const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = jsonElement.reqBody;
+            const { scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = jsonElement.reqBody;
 
-            const jobFunc = async (scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone, status ) => {
+            const jobFunc = async (scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone, status) => {
 
-                try{
+                try {
 
                     console.log('\x1b[33m inside job sync! \x1b[0m');
 
                     const reqBodyToSave = {
 
-                        "scheduleId":scheduleId,
+                        "scheduleId": scheduleId,
                         "startTime": startTime,
-                        "endTime":endTime,
-                        "startDay":startDay,
-                        "endDay":endDay,
-                        "switchingScheme":switchingScheme,
+                        "endTime": endTime,
+                        "startDay": startDay,
+                        "endDay": endDay,
+                        "switchingScheme": switchingScheme,
                         "timeZone": timeZone
                     }
-            
-                    console.log("inside create job begin");            
+
+                    console.log("inside create job begin");
                     console.log(startTime.split(":"));
-            
+
                     const startString = startTime.split(":");
                     console.log(startString);
                     const stopString = endTime.split(":");
-            
+
                     let cronStringStart = startString[1] + " " + startString[0] + " * * " + startDay;
                     console.log(cronStringStart);
                     let cronStringStop = stopString[1] + " " + stopString[0] + " * * " + endDay;
                     console.log(cronStringStop);
-            
-                    const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
+
+                    const cronJobStart = await cron.schedule(cronStringStart, async () => {
                         console.log('job started');
-                        const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
+                        const webServerResponse = webserverApi.post('/devices/scheduledSwitch', switchingScheme);
                     }, {
                         scheduled: false,
                         timezone: timeZone
                     });
-            
+
                     const jobToSaveStart = {
                         "id": scheduleId,
                         "reqBody": reqBodyToSave,
                         "jobString": cronStringStart,
                         "job": cronJobStart,
                         "status": true
-                    };	
-            
+                    };
+
                     // console.log(jobToSaveStart);
-            
+
                     // if(!files.createEntry(scheduleId, "startJobs", JSON.stringify(jobToSaveStart))){
                     //     console.log("File not created");
                     //     throw new Error("File not created");
                     // }else{
                     //     console.log("Entry created");
                     // }
-            
+
                     const switchingSchemeInvert = {};
-            
-                        for (const key in switchingScheme) {
-                                if (switchingScheme.hasOwnProperty(key)) {
-                                        switchingSchemeInvert[key] = !switchingScheme[key];
-                                }
+
+                    for (const key in switchingScheme) {
+                        if (switchingScheme.hasOwnProperty(key)) {
+                            switchingSchemeInvert[key] = !switchingScheme[key];
                         }
-            
-                    const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
+                    }
+
+                    const cronJobStop = await cron.schedule(cronStringStop, () => {
                         console.log('job started');
-                        const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
+                        const webServerResponse = webserverApi.post('/devices/scheduledSwitch', switchingSchemeInvert);
                     }, {
                         scheduled: false,
                         timezone: [timeZone]
                     });
-            
+
                     const jobToSaveStop = {
                         "id": scheduleId,
                         "reqBody": reqBodyToSave,
                         "jobString": cronStringStop,
                         "job": cronJobStop,
                         "status": true
-                    };	
-            
+                    };
+
                     // if(!files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))){
                     //     throw new Error("File not created");
                     // }
-                    
-                    if(status){
+
+                    if (status) {
                         cronJobStart.start();
                         cronJobStop.start();
                     }
-                    
+
                     jobs.saveJobStart(scheduleId, cronJobStart);
                     jobs.saveJobStop(scheduleId, cronJobStop);
-            
+
                     console.log("Job Created\n\n\n");
-            
-                }catch(error){
+
+                } catch (error) {
                     console.log(error.message);
                 }
             }
@@ -160,7 +162,7 @@ const server = app.listen(4004, async function () {
     });
 
     // stopJobsArr.forEach(element => {
-        
+
     //     const jsonElement = JSON.parse(element);
 
     //     if(!_.isNull(jsonElement)){

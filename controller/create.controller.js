@@ -1,12 +1,13 @@
-import {jobs, files} from "../init.js";
+import { jobs, files } from "../init.js";
 import axios from 'axios';
 import cron from 'node-cron';
+import { webserverApi } from "../apis.js";
 
 
-export const createJobs = async (req,res) => {
+export const createJobs = async (req, res) => {
 
-	try{
-		const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
+	try {
+		const { scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
 
 		console.log(startTime.split(":"));
 
@@ -19,11 +20,11 @@ export const createJobs = async (req,res) => {
 		let cronStringStop = stopString[1] + " " + stopString[0] + " * * " + endDay;
 		console.log(cronStringStop);
 
-		const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
+		const cronJobStart = await cron.schedule(cronStringStart, () => {
 			console.log('job started');
-			try{
-				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
-			}catch(error){
+			try {
+				const webServerResponse = webserverApi.post('/devices/scheduledSwitch', switchingScheme);
+			} catch (error) {
 				console.log(error.message);
 			}
 		}, {
@@ -37,33 +38,33 @@ export const createJobs = async (req,res) => {
 			"jobString": cronStringStart,
 			"job": cronJobStart,
 			"status": true
-		};	
+		};
 
 		console.log(jobToSaveStart);
 
-		if(!files.createEntry(scheduleId, "startJobs", JSON.stringify(jobToSaveStart))){
+		if (!files.createEntry(scheduleId, "startJobs", JSON.stringify(jobToSaveStart))) {
 			console.log("File not created");
 			throw new Error("File not created");
-		}else{
+		} else {
 			console.log("Entry created");
 		}
 
 		const switchingSchemeInvert = {};
 
-			for (const key in switchingScheme) {
-					if (switchingScheme.hasOwnProperty(key)) {
-							switchingSchemeInvert[key] = !switchingScheme[key];
-					}
+		for (const key in switchingScheme) {
+			if (switchingScheme.hasOwnProperty(key)) {
+				switchingSchemeInvert[key] = !switchingScheme[key];
 			}
+		}
 
-		const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
+		const cronJobStop = await cron.schedule(cronStringStop, () => {
 			console.log('job started');
-				try{
-					const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
-				}catch(error){
-					console.log(error.message);
-				}
-			}, {
+			try {
+				const webServerResponse = webserverApi.post('/devices/scheduledSwitch', switchingSchemeInvert);
+			} catch (error) {
+				console.log(error.message);
+			}
+		}, {
 			scheduled: false,
 			timezone: timeZone
 		});
@@ -74,12 +75,12 @@ export const createJobs = async (req,res) => {
 			"jobString": cronStringStop,
 			"job": cronJobStop,
 			"status": true
-		};	
+		};
 
-		if(!files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))){
+		if (!files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))) {
 			throw new Error("File not created");
 		}
-		
+
 		cronJobStart.start();
 		cronJobStop.start();
 
@@ -88,19 +89,19 @@ export const createJobs = async (req,res) => {
 
 		res.status(200).send("Job Created");
 
-	}catch(error){
+	} catch (error) {
 		res.status(500).send(error.message);
 	}
 }
 
-export const createJobsBegin = async (req,res) => {
+export const createJobsBegin = async (req, res) => {
 
-	try{
+	try {
 
 		console.log("inside create job begin");
 
 		const status = req.params.status;
-		const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
+		const { scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
 
 		console.log(startTime.split(":"));
 
@@ -113,13 +114,14 @@ export const createJobsBegin = async (req,res) => {
 		let cronStringStop = stopString[1] + " " + stopString[0] + " * * " + endDay;
 		console.log(cronStringStop);
 
-		const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
+		const cronJobStart = await cron.schedule(cronStringStart, () => {
 			console.log('job started');
-			try{
-				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
-			}catch(error){
+			try {
+				const webServerResponse = axios.post('/devices/scheduledSwitch', switchingScheme);
+			} catch (error) {
 				console.log(error.message);
-			}		}, {
+			}
+		}, {
 			scheduled: false,
 			timezone: timeZone
 		});
@@ -130,32 +132,33 @@ export const createJobsBegin = async (req,res) => {
 			"jobString": cronStringStart,
 			"job": cronJobStart,
 			"status": true
-		};	
+		};
 
 		console.log(jobToSaveStart);
 
-		if(!files.createEntry(scheduleId, "startJobs", JSON.stringify(jobToSaveStart))){
+		if (!files.createEntry(scheduleId, "startJobs", JSON.stringify(jobToSaveStart))) {
 			console.log("File not created");
 			throw new Error("File not created");
-		}else{
+		} else {
 			console.log("Entry created");
 		}
 
 		const switchingSchemeInvert = {};
 
-			for (const key in switchingScheme) {
-					if (switchingScheme.hasOwnProperty(key)) {
-							switchingSchemeInvert[key] = !switchingScheme[key];
-					}
+		for (const key in switchingScheme) {
+			if (switchingScheme.hasOwnProperty(key)) {
+				switchingSchemeInvert[key] = !switchingScheme[key];
 			}
+		}
 
-		const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
+		const cronJobStop = await cron.schedule(cronStringStop, () => {
 			console.log('job started');
-			try{
-				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
-			}catch(error){
+			try {
+				const webServerResponse = axios.post('/devices/scheduledSwitch', switchingSchemeInvert);
+			} catch (error) {
 				console.log(error.message);
-			}		}, {
+			}
+		}, {
 			scheduled: false,
 			timezone: timeZone
 		});
@@ -166,23 +169,23 @@ export const createJobsBegin = async (req,res) => {
 			"jobString": cronStringStop,
 			"job": cronJobStop,
 			"status": true
-		};	
+		};
 
-		if(!files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))){
+		if (!files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))) {
 			throw new Error("File not created");
 		}
-		
-		if(status === "active"){
+
+		if (status === "active") {
 			cronJobStart.start();
 			cronJobStop.start();
 		}
-		
+
 		jobs.saveJobStart(scheduleId, cronJobStart);
 		jobs.saveJobStop(scheduleId, cronJobStop);
 
 		res.status(200).send("Job Created");
 
-	}catch(error){
+	} catch (error) {
 		res.status(500).send(error.message);
 	}
 }

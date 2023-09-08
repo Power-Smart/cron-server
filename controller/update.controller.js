@@ -1,27 +1,27 @@
-import {jobs} from "../init.js";
+import { jobs } from "../init.js";
 import axios from 'axios';
 import cron from 'node-cron';
 
 
-export const updateJobs = async (req,res) => {
+export const updateJobs = async (req, res) => {
 
-    try{
-        const {scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
+	try {
+		const { scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
 
-        if(jobs.jobListStart.hasOwnProperty(scheduleId) && jobs.jobListStop.hasOwnProperty(scheduleId)){
+		if (jobs.jobListStart.hasOwnProperty(scheduleId) && jobs.jobListStop.hasOwnProperty(scheduleId)) {
 
-            delete jobs.jobListStart[scheduleId];
-            delete jobs.jobListStop[scheduleId];
+			delete jobs.jobListStart[scheduleId];
+			delete jobs.jobListStop[scheduleId];
 
-            if(!files.deleteEntry(scheduleId, "startJobs") || !files.deleteEntry(scheduleId, "stopJobs")){
-                throw new Error("File not deleted");
-            }
+			if (!files.deleteEntry(scheduleId, "startJobs") || !files.deleteEntry(scheduleId, "stopJobs")) {
+				throw new Error("File not deleted");
+			}
 
-        }else{
-            throw new Error("No job found");
-        }
+		} else {
+			throw new Error("No job found");
+		}
 
-        console.log(startTime.split(":"));
+		console.log(startTime.split(":"));
 
 		const startString = startTime.split(":");
 		console.log(startString);
@@ -32,13 +32,14 @@ export const updateJobs = async (req,res) => {
 		let cronStringStop = stopString[1] + " " + stopString[0] + " * * " + endDay;
 		console.log(cronStringStop);
 
-		const cronJobStart =  await cron.schedule(cronStringStart, () =>  {
+		const cronJobStart = await cron.schedule(cronStringStart, () => {
 			console.log('job started');
-			try{
-				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingScheme);
-			}catch(error){
+			try {
+				const webServerResponse = webserverApi.post('/devices/scheduledSwitch/', switchingScheme);
+			} catch (error) {
 				console.log(error.message);
-			}		}, {
+			}
+		}, {
 			scheduled: false,
 			timezone: timeZone
 		});
@@ -48,27 +49,28 @@ export const updateJobs = async (req,res) => {
 			"jobString": cronStringStart,
 			"job": cronJobStart,
 			"status": true
-		};	
+		};
 
-		if(!files.createEntry(scheduleId, "startJobs", JSON.parse(jobToSaveStart))){
+		if (!files.createEntry(scheduleId, "startJobs", JSON.parse(jobToSaveStart))) {
 			throw new Error("File not created");
 		}
 
 		const switchingSchemeInvert = {};
 
-			for (const key in switchingScheme) {
-					if (switchingScheme.hasOwnProperty(key)) {
-							switchingSchemeInvert[key] = !switchingScheme[key];
-					}
+		for (const key in switchingScheme) {
+			if (switchingScheme.hasOwnProperty(key)) {
+				switchingSchemeInvert[key] = !switchingScheme[key];
 			}
+		}
 
-		const cronJobStop =  await cron.schedule(cronStringStop, () =>  {
+		const cronJobStop = await cron.schedule(cronStringStop, () => {
 			console.log('job started');
-			try{
-				const webServerResponse =  axios.post('/deviceSwitchFunction/', switchingSchemeInvert);
-			}catch(error){
+			try {
+				const webServerResponse = webserverApi.post('/devices/scheduledSwitch/', switchingSchemeInvert);
+			} catch (error) {
 				console.log(error.message);
-			}		}, {
+			}
+		}, {
 			scheduled: false,
 			timezone: timeZone
 		});
@@ -78,12 +80,12 @@ export const updateJobs = async (req,res) => {
 			"jobString": cronStringStop,
 			"job": cronJobStop,
 			"status": true
-		};	
+		};
 
-		if(!files.createEntry(scheduleId, "stopJobs", JSON.parse(jobToSaveStop))){
+		if (!files.createEntry(scheduleId, "stopJobs", JSON.parse(jobToSaveStop))) {
 			throw new Error("File not created");
 		}
-		
+
 		cronJobStart.start();
 		cronJobStop.start();
 
@@ -93,7 +95,7 @@ export const updateJobs = async (req,res) => {
 		res.status(200).send("Job Created");
 
 
-    }catch(error){
-        res.status(500).send(error.message);
-    }
+	} catch (error) {
+		res.status(500).send(error.message);
+	}
 }
