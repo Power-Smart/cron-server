@@ -7,7 +7,7 @@ import cron from 'node-cron';
 export const updateJobs = async (req, res) => {
 
 	try {
-		const { scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone } = req.body;
+		const { scheduleId, startTime, endTime, startDay, endDay, switchingScheme, timeZone, status } = req.body;
 
 		console.log(req.body);
 		if (jobs.jobListStart.hasOwnProperty(scheduleId) && jobs.jobListStop.hasOwnProperty(scheduleId)) {
@@ -56,7 +56,7 @@ export const updateJobs = async (req, res) => {
 			"reqBody": req.body,
 			"jobString": cronStringStart,
 			"job": cronJobStart,
-			"status": true
+			"status": status
 		};
 
 		console.log(jobToSaveStart);
@@ -90,7 +90,7 @@ export const updateJobs = async (req, res) => {
 			"reqBody": req.body,
 			"jobString": cronStringStop,
 			"job": cronJobStop,
-			"status": true
+			"status": status
 		};
 
 		if (!files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))) {
@@ -112,4 +112,46 @@ export const updateJobs = async (req, res) => {
 		console.log(error);
 		res.status(500).send(error.message);
 	}
+}
+
+export const toggleActivation = async (req, res) => {
+	try {
+		const { scheduleId, status } = req.body;
+		if (jobs.jobListStart.hasOwnProperty(scheduleId) && jobs.jobListStop.hasOwnProperty(scheduleId)) {
+			const jobToSaveStart = JSON.parse(await files.readEntry("startJobs", scheduleId));
+			const jobToSaveStop = JSON.parse(await files.readEntry("stopJobs", scheduleId));
+			jobToSaveStart.status = status;
+			jobToSaveStop.status = status;
+			if (files.deleteEntry(scheduleId, "startJobs")
+				&& files.deleteEntry(scheduleId, "stopJobs")) {
+				if (!files.createEntry(scheduleId, "startJobs", JSON.stringify(jobToSaveStart))
+					|| !files.createEntry(scheduleId, "stopJobs", JSON.stringify(jobToSaveStop))) {
+					console.log("File not created");
+					throw new Error("File not created");
+				}
+				console.log("Files created");
+			} else {
+				throw new Error("File not deleted");
+			}
+
+			const start = jobs.jobListStart[scheduleId];
+			const stop = jobs.jobListStop[scheduleId];
+			jobs.toggleActivation(scheduleId, status);
+			if (status) {
+				start.start();
+				stop.start();
+			} else {
+				start.stop();
+				stop.stop();
+			}
+			console.log("Job Toggled");
+			res.status(200).send("Job Toggled");
+		} else {
+			throw new Error("No job found");
+		}
+	} catch (error) {
+		console.log(error);
+		res.status(500).send(error.message);
+	}
+
 }

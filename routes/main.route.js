@@ -8,7 +8,8 @@ import {
     createJobsBegin
 } from "../controller/create.controller.js";
 import {
-    updateJobs
+    updateJobs,
+    toggleActivation
 } from "../controller/update.controller.js";
 import {
     deleteJobs
@@ -19,10 +20,11 @@ const router = express.Router();
 
 router.get("/", mainController);
 router.post("/", mainControllerPost);
-router.post("/create",createJobs);
-router.post("/createBegin/:status",createJobsBegin);
-router.post("/update",updateJobs);
-router.post("/delete",deleteJobs);
+router.post("/create", createJobs);
+router.post("/createBegin/:status", createJobsBegin);
+router.post("/update", updateJobs);
+router.post("/delete", deleteJobs);
+router.post("/toggle_activation", toggleActivation);
 
 export default router;
 
