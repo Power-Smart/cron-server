@@ -74,7 +74,7 @@ const server = app.listen(4004, async function () {
 
                     const cronJobStart = await cron.schedule(cronStringStart, async () => {
                         console.log('job started');
-                        const webServerResponse = webserverApi.post('/devices/scheduledSwitch', switchingScheme);
+                        const webServerResponse = axios.post('http://websockets:4001/relayswitch', switchingScheme);
                     }, {
                         scheduled: false,
                         timezone: timeZone
